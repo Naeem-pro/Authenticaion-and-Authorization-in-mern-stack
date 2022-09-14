@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import { Box } from "@mui/system";
 import { Button, TextField, Typography } from "@mui/material";
 const Signup = () => {
@@ -7,7 +9,7 @@ const Signup = () => {
     email: "",
     password: "",
   });
-
+  const navigate = useNavigate();
   const handleChange = (e) => {
     setData((prev) => ({
       ...prev,
@@ -15,10 +17,14 @@ const Signup = () => {
     }));
   };
 
-  const handlesubmit = (e) => {
+  const handlesubmit = async (e) => {
     e.preventDefault();
-    console.log("sunmit");
-    console.log(data);
+    try {
+      let response = await axios.post("http://localhost:4000/api/signup", data);
+      navigate("/login");
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
