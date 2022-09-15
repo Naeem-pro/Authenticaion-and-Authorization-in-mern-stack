@@ -58,8 +58,11 @@ const login = async (req, res) => {
     } else {
       const token = jwt.sign({ id: existinguser._id }, "mytoken", {
         //generate token after finding correct user from database
-        expiresIn: "30s",
+        expiresIn: "35s",
       });
+      if (req.cookies[`${existinguser._id}`]) {
+        req.cookies[`${existinguser._id}`] = "";
+      }
       res.cookie(String(existinguser._id), token, {
         path: "/",
         expires: new Date(Date.now() + 1000 * 30),
@@ -100,7 +103,39 @@ const getUser = async (req, res) => {
   }
 };
 
+const refreshToken = (req, res, next) => {
+  const cookies = req.headers.cookie;
+  const prevToken = cookies.split("=")[1];
+  if (!prevToken) {
+    return res.status(400).json({
+      error: "Could not found token",
+    });
+  }
+  const result = jwt.verify(prevToken, "mytoken");
+  if (!result) {
+    return res.status(400).json({
+      message: "Authentication failed",
+    });
+  }
+  res.clearCookie(result.id);
+  req.cookies[result.id] = "";
+
+  const token = jwt.sign({ id: result.id }, "mytoken", {
+    expiresIn: "35s",
+  });
+  res.cookie(String(result.id), token, {
+    path: "/",
+    expires: new Date(Date.now() + 1000 * 30),
+    httpOnly: true,
+    sameSite: "lax",
+  });
+  console.log("refresh", token);
+  req.id = result.id;
+  next();
+};
+
 exports.signup = singnup;
 exports.login = login;
 exports.verifyToken = verifyToken;
 exports.getUser = getUser;
+exports.refreshToken = refreshToken;
