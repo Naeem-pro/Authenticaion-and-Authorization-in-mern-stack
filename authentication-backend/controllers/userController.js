@@ -134,8 +134,25 @@ const refreshToken = (req, res, next) => {
   next();
 };
 
+const logout = (req, res) => {
+  const cookies = req.headers.cookie;
+  const prevToken = cookies.split("=")[1];
+  if (!prevToken) {
+    return res.status(400).json({
+      error: "Could not found token",
+    });
+  }
+  const result = jwt.verify(prevToken, "mytoken");
+  res.clearCookie(`${result.id}`);
+  req.cookies[`${result.id}`] = "";
+  res.status(200).json({
+    message: "User logout successfully",
+  });
+};
+
 exports.signup = singnup;
 exports.login = login;
+exports.logout = logout;
 exports.verifyToken = verifyToken;
 exports.getUser = getUser;
 exports.refreshToken = refreshToken;

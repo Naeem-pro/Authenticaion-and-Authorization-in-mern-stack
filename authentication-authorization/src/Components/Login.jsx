@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import { ValidAuth } from "../ContextApi/AuthProvider";
 import axios from "axios";
 import { Box } from "@mui/system";
 import { Button, TextField, Typography } from "@mui/material";
 const Login = () => {
+  const { setAccount } = useContext(ValidAuth);
   const [data, setData] = useState({
     email: "",
     password: "",
@@ -20,6 +22,10 @@ const Login = () => {
     e.preventDefault();
     try {
       let response = await axios.post("http://localhost:4000/api/login", data);
+      setAccount({
+        isLoggedin: true,
+        isLoggedout: false,
+      });
       navigate("/user");
     } catch (error) {
       console.log(error);

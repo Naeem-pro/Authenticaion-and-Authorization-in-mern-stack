@@ -1,9 +1,28 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
+import axios from "axios";
 import { AppBar, Tab, Tabs, Toolbar, Typography } from "@mui/material";
 import { Box } from "@mui/system";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { ValidAuth } from "../ContextApi/AuthProvider";
+axios.defaults.withCredentials = true;
 const Header = () => {
   const [value, setValue] = useState();
+  const { account, setAccount } = useContext(ValidAuth);
+  const navigate = useNavigate();
+  const handleLogout = async () => {
+    try {
+      let response = await axios.get("http://localhost:4000/api/logout", {
+        withCredentials: true,
+      });
+      setAccount({
+        isLoggedin: false,
+        isLoggedout: true,
+      });
+      navigate("/login");
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <div>
       <AppBar position="sticky">
@@ -16,8 +35,20 @@ const Header = () => {
               value={value}
               textColor="inherit"
             >
-              <Tab to="/login" LinkComponent={Link} label="login" />
-              <Tab to="/signup" LinkComponent={Link} label="signup" />
+              {!account.isLoggedin && (
+                <>
+                  <Tab to="/login" LinkComponent={Link} label="login" />
+                  <Tab to="/signup" LinkComponent={Link} label="signup" />
+                </>
+              )}
+              {account.isLoggedin && (
+                <Tab
+                  to="/logout"
+                  LinkComponent={Link}
+                  label="logout"
+                  onClick={handleLogout}
+                />
+              )}
             </Tabs>
           </Box>
         </Toolbar>

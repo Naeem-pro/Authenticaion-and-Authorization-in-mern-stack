@@ -3,6 +3,7 @@ const router = express.Router();
 const {
   signup,
   login,
+  logout,
   verifyToken,
   getUser,
   refreshToken,
@@ -10,6 +11,7 @@ const {
 
 router.post("/signup", signup);
 router.post("/login", login);
+router.get("/logout", logout);
 router.get("/user", verifyToken, getUser);
 router.get("/refresh", refreshToken, verifyToken, getUser);
 
